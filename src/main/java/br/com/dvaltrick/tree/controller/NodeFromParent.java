@@ -11,7 +11,7 @@ public class NodeFromParent extends Node implements Serializable {
 	private Boolean hasChildren;	
 
 	public Boolean getHasChildren() {
-		return hasChildren;
+		return hasChildren;    
 	}
 
 	public void setHasChildren(Boolean hasChildren) {
