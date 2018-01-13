@@ -2,7 +2,6 @@ package br.com.dvaltrick.tree.controller;
 
 import java.util.List;
 
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,20 +17,20 @@ public class NodeController {
 	@Autowired
 	NodeService service;
 	
-	@RequestMapping(method=RequestMethod.POST, 
+	@RequestMapping(method={RequestMethod.POST,RequestMethod.PUT},
 			value="/node", 
 			consumes=MediaType.APPLICATION_JSON_VALUE,
 			produces=MediaType.APPLICATION_JSON_VALUE)
-	public String postNode(@RequestBody Node toSaveNode){
+	public String saveNode(@RequestBody Node toSaveNode){
 		Node saved = new Node();
 		try{
 			saved = service.save(toSaveNode);
 		}catch(Exception e){
-			System.out.println("Erro de requisição");
+			System.out.println("Erro de requisição"); 
 			e.printStackTrace(); 
 		}
 		
-		return new JSONObject("{\"id\":"+saved.getId().toString()+"}").toString();
+		return "{\"id\":"+saved.getId().toString()+"}";
 	}
 	
 	@RequestMapping(method=RequestMethod.GET, value="/node")
