@@ -48,7 +48,7 @@ public class Node {
 	@Transient
 	private Integer parentId;
 	
-	@LazyCollection(LazyCollectionOption.FALSE)
+	@LazyCollection(LazyCollectionOption.TRUE)
 	@OneToMany (mappedBy = "parent")
 	@Cascade({CascadeType.ALL})
 	@OrderBy("id ASC")

@@ -1,10 +1,8 @@
-package br.com.dvaltrick.tree.controller;
+package br.com.dvaltrick.tree.model;
 
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import br.com.dvaltrick.tree.model.Node;
 
 @JsonIgnoreProperties(value="children")
 public class NodeFromParent extends Node implements Serializable { 

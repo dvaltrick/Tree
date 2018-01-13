@@ -7,8 +7,8 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.com.dvaltrick.tree.controller.NodeFromParent;
 import br.com.dvaltrick.tree.model.Node;
+import br.com.dvaltrick.tree.model.NodeFromParent;
 import br.com.dvaltrick.tree.repository.NodeRepository;
 
 @Service
@@ -17,10 +17,17 @@ public class NodeService {
 	NodeRepository repository;
 	
 	public Node save(Node toSaveNode) throws Exception{
-		if(toSaveNode.getParentId() != null){
-			if(toSaveNode.getParentId() > 0){
-				toSaveNode.setParent(repository.findOne(toSaveNode.getParentId()));
+		try{
+			testParentWithItself(toSaveNode);
+			testIfParentExist(toSaveNode);
+			
+			if(toSaveNode.getParentId() != null){
+				if(toSaveNode.getParentId() > 0){
+					toSaveNode.setParent(repository.findOne(toSaveNode.getParentId()));
+				}
 			}
+		}catch(Exception e){
+			throw new Exception(e.getMessage());
 		}
 		
 		return repository.save(toSaveNode);
@@ -38,7 +45,7 @@ public class NodeService {
 			for(Node childrenNode:childrenList){
 				NodeFromParent nodeFromParent = new NodeFromParent();
 				nodeFromParent.setId(childrenNode.getId());
-				nodeFromParent.setCode(childrenNode.getCode());
+				nodeFromParent.setCode(childrenNode.getCode()); 
 				nodeFromParent.setDescription(childrenNode.getDescription());
 				nodeFromParent.setParentId(childrenNode.getParentId());
 				nodeFromParent.setDetails(childrenNode.getDetails());
@@ -48,5 +55,19 @@ public class NodeService {
 		}
 		
 		return allNodesFromParent;
+	}
+	
+	private void testParentWithItself(Node toTestNode) throws Exception{
+		if(toTestNode.getParentId() != null &&
+				toTestNode.getParentId() == toTestNode.getId()){
+			throw new Exception("A node can't be a parent from itself.");
+		}
+	}
+	
+	private void testIfParentExist(Node toTestNode) throws Exception{
+		if(toTestNode.getParentId() != null && 
+				repository.findOne(toTestNode.getParentId()) == null){
+			throw new Exception("The parent node doesn't exist.");
+		}
 	}
 }
