@@ -12,5 +12,5 @@ import br.com.dvaltrick.tree.model.Node;
 public interface NodeRepository extends JpaRepository<Node,Integer> {
 	@Query("SELECT A FROM Node A " +
            " WHERE A.parent is null ")
-	List<Node> getTreeByRoot(); 
+	Node getTreeByRoot(); 
 }

@@ -33,7 +33,7 @@ public class NodeController {
 			value="/node", 
 			consumes=MediaType.APPLICATION_JSON_VALUE,
 			produces=MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody Map<String, Object> saveNode(@RequestBody Node toSaveNode){
+	public Map<String, Object> saveNode(@RequestBody Node toSaveNode){
 		Node saved = new Node();
 		Map<String, Object> result = new HashMap<String, Object>(); 
 		
@@ -50,7 +50,7 @@ public class NodeController {
 	@RequestMapping(method=RequestMethod.GET, 
 			value="/node",
 			produces=MediaType.APPLICATION_JSON_VALUE)
-	public List<Node> getTreeByRoot(){
+	public Node getTreeByRoot(){
 		return service.getTreeByRoot();
 	}
 	 
@@ -60,4 +60,23 @@ public class NodeController {
 	public List<NodeFromParent> getTreeByParent(@PathVariable("parentId") Integer parentId){
 		return service.getTreeByParent(parentId);
 	}
+	
+	@RequestMapping(method=RequestMethod.DELETE,
+		value="/node/{id}",
+		produces=MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody Map<String,String> deleteNode(@PathVariable("id") Integer id){
+		Map<String,String> result = new HashMap<String,String>();
+		String key = "status";
+		
+		try{
+			service.deleteNode(id);
+			
+			result.put(key, "success");	
+		}catch(Exception e){
+			result.put(key, "error: " + e.getMessage());
+		}
+		
+		return result;
+	}
+	
 }

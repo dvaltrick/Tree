@@ -18,6 +18,7 @@ public class NodeService {
 	
 	public Node save(Node toSaveNode) throws Exception{
 		try{
+			testRootUnique(toSaveNode);
 			testParentWithItself(toSaveNode);
 			testIfParentExist(toSaveNode);
 			
@@ -33,7 +34,7 @@ public class NodeService {
 		return repository.save(toSaveNode);
 	}
 	
-	public List<Node> getTreeByRoot(){
+	public Node getTreeByRoot(){
 		return repository.getTreeByRoot();
 	}
 	
@@ -55,6 +56,22 @@ public class NodeService {
 		}
 		
 		return allNodesFromParent;
+	}
+	
+	public void deleteNode(Integer id) throws Exception{
+		try{ 
+			repository.delete(id);
+		}catch(Exception e){
+			throw new Exception("Delete not completed - " + e.getMessage());
+		}
+	}
+	
+	private void testRootUnique(Node toTestNode) throws Exception {
+		if(toTestNode.getParent() == null){
+			if(repository.getTreeByRoot() != null){
+				throw new Exception("The tree already has a root");
+			}
+		}
 	}
 	
 	private void testParentWithItself(Node toTestNode) throws Exception{
