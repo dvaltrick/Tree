@@ -55,6 +55,16 @@ public class Node {
 	@JsonManagedReference
 	private Set<Node> children = new HashSet<Node>();
 
+	public Node(){}
+	
+	public Node(Integer id, String code, String description, String details, Integer parentId){
+		this.id = id;
+		this.code = code;
+		this.description = description;
+		this.details = details;
+		this.parentId = parentId;
+	}
+	
 	public Integer getId() {
 		return id;
 	}

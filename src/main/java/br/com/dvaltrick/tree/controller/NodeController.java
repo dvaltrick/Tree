@@ -33,7 +33,7 @@ public class NodeController {
 			value="/node", 
 			consumes=MediaType.APPLICATION_JSON_VALUE,
 			produces=MediaType.APPLICATION_JSON_VALUE)
-	public Map<String, Object> saveNode(@RequestBody Node toSaveNode){
+	public @ResponseBody Map<String, Object> saveNode(@RequestBody Node toSaveNode){
 		Node saved = new Node();
 		Map<String, Object> result = new HashMap<String, Object>(); 
 		

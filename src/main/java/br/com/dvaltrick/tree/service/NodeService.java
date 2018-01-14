@@ -24,6 +24,8 @@ public class NodeService {
 			
 			if(toSaveNode.getParentId() != null){
 				if(toSaveNode.getParentId() > 0){
+					hierarchicalValidation(toSaveNode.getId(), toSaveNode.getParentId());
+					
 					toSaveNode.setParent(repository.findOne(toSaveNode.getParentId()));
 				}
 			}
@@ -66,25 +68,42 @@ public class NodeService {
 		}
 	}
 	
-	private void testRootUnique(Node toTestNode) throws Exception {
-		if(toTestNode.getParent() == null){
+	public void testRootUnique(Node toTestNode) throws Exception {
+		if(toTestNode.getParentId() == null){
 			if(repository.getTreeByRoot() != null){
 				throw new Exception("The tree already has a root");
 			}
 		}
 	}
 	
-	private void testParentWithItself(Node toTestNode) throws Exception{
+	public void testParentWithItself(Node toTestNode) throws Exception{
 		if(toTestNode.getParentId() != null &&
 				toTestNode.getParentId() == toTestNode.getId()){
 			throw new Exception("A node can't be a parent from itself.");
 		}
 	}
 	
-	private void testIfParentExist(Node toTestNode) throws Exception{
+	public void testIfParentExist(Node toTestNode) throws Exception{
 		if(toTestNode.getParentId() != null && 
 				repository.findOne(toTestNode.getParentId()) == null){
 			throw new Exception("The parent node doesn't exist.");
+		}
+	}
+	
+	public void hierarchicalValidation(Integer toTestParentId, Integer toCompareParentId) throws Exception{
+		if(toTestParentId != null){ 
+			List<NodeFromParent> childrenNode = getTreeByParent(toTestParentId);
+			if(!childrenNode.isEmpty()){
+				for(NodeFromParent childNode:childrenNode){
+					if(toCompareParentId == childNode.getId()){
+						throw new Exception("A node can't be a child of one of yours dependent hierarchical node.");
+					}else{
+						if(childNode.getHasChildren()){
+							hierarchicalValidation(childNode.getId(), toCompareParentId);
+						}
+					}
+				}
+			}
 		}
 	}
 }
