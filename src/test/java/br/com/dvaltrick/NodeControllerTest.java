@@ -1,5 +1,7 @@
 package br.com.dvaltrick;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -17,7 +19,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -37,45 +38,65 @@ public class NodeControllerTest {
 	
 	@Test
 	public void testNodeController() throws Exception{		
-		//Try to add the root in the tree
+		//Try to add the root into the tree
 		testPost(new Node(null,"root","Root description","Root details",null),"$.id", Matchers.is(1));
 		
-		//Try to add one more root in the tree
+		//Try to add one more root into the tree
 		testPost(new Node(null,"root","Root description","Root details",null),"$.error", Matchers.any(String.class));
 		
-		//Try to add a child in a root
+		//Try to add a child into a root
 		testPost(new Node(null,"first child","first child description","first child details",1),"$.id", Matchers.is(2));
 		
-		//Try to add a child in a no existent parent
+		//Try to add a child into an inexistent parent
 		testPost(new Node(null,"second child","second child description","second child details",10),"$.error", Matchers.any(String.class));
 		
-		//Try to add a child parent from itself
+		//Try to add a child as parent to itself
 		testPut(new Node(2,"second child","second child description","second child details",2),"$.error", Matchers.any(String.class));
 		
-		//Try to add a new child in a root
+		//Try to add a new child into a root
 		testPost(new Node(null,"third child","third child description","third child details",1),"$.id", Matchers.is(3));
 		
-		//Try to add a new child in a child
+		//Try to add a new child into a child
 		testPost(new Node(null,"forth child","forth child description","forth child details",3),"$.id", Matchers.is(4));
 		
-		//Try to add a new child in a child of a child
+		//Try to add a new child into a grandchild
 		testPost(new Node(null,"fifth child","fifth child description","fifth child details",4),"$.id", Matchers.is(5));
 		
-		//Try to add a new child in a child of a child
+		//Try to add a new child into a grandchild
 		testPost(new Node(null,"sixth child","sixth child description","sixth child details",5),"$.id", Matchers.is(6));
 		
 		//Try to change a hierarchical dependent node
 		testPut(new Node(4,"forth child","forth child description","forth child details",5),"$.error", Matchers.any(String.class));
 		
-		//Try to change a hierarchical dependent node level two
+		//Try to change a hierarchical dependent node of second level
 		testPut(new Node(4,"forth child","forth child description","forth child details",6),"$.error", Matchers.any(String.class));
 
-		//Try to change to a non dependent node
+		//Try to change a node to a non dependent node
 		testPut(new Node(4,"forth child","forth child description","forth child details",2),"$.id", Matchers.is(4));
 
+		//Try to get the root
+		testGetRoot();
+		
+		//Try to get by parent 1
+		testGetByParent(1,2);
+		
+		//Try to get by parent 2
+		testGetByParent(2,1);
+		
+		//Try to get by parent 2
+		testGetByParent(3,0);
+		
+		//Try to delete a node
+		testDelete(4);
+		
+		//Try to get by parent 2 after deleted child
+		testGetByParent(2,0);
+				
+		//Try to delete a root
+		testDelete(1);
 	}
 		
-	private void testPost(Node toTestNode,String jsonKey, Matcher matcher) throws Exception{
+	private void testPost(Node toTestNode, String jsonKey, Matcher matcher) throws Exception{
 		mockMvc.perform(post("/node")
 				.contentType(MediaType.APPLICATION_JSON_VALUE)
 				.content(asJsonString(toTestNode)))
@@ -93,6 +114,32 @@ public class NodeControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath(jsonKey, matcher));
 		
+	}
+	
+	private void testGetRoot() throws Exception{
+		mockMvc.perform(get("/node")
+				.contentType(MediaType.APPLICATION_JSON_VALUE))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.id", Matchers.is(1)))
+			.andExpect(jsonPath("$.code", Matchers.is("root")))
+			.andExpect(jsonPath("$.children.*", Matchers.hasSize(2)));
+	}
+	
+	private void testGetByParent(Integer parentId, Integer size) throws Exception{
+		mockMvc.perform(get("/node/"+parentId.toString())
+				.contentType(MediaType.APPLICATION_JSON_VALUE))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.*", Matchers.hasSize(size)));
+	}
+	
+	private void testDelete(Integer id) throws Exception{
+		mockMvc.perform(delete("/node/"+id.toString())
+				.contentType(MediaType.APPLICATION_JSON_VALUE))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("status",Matchers.is("success")));
 	}
 	
 	public static String asJsonString(final Object obj) {
